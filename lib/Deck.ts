@@ -50,7 +50,7 @@ function validateCard(card: Card): boolean {
 
 export class Deck {
     private initDeck: Card[];
-    private cards: Card[];
+    cards: Card[];
 
     private dealOne(): Card {
         if (this.cards.length < 1) {

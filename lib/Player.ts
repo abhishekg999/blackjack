@@ -110,7 +110,7 @@ export class BasicStrategyPlayer extends Player {
         } else if (playerValue <= 11) {
             return BJOption.Hit;
         } else {
-            if (dealerValue >= 7) {
+            if (dealerValue >= 7 || (dealerValue <= 3 && playerValue === 12)) {
                 return BJOption.Hit;
             } else {
                 return BJOption.Stand;

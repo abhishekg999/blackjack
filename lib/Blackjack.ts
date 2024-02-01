@@ -89,12 +89,12 @@ export class Blackjack {
 
         const playerHands: { [key: number]: Hand } = {};
         const dealerHand: Hand = [];
+
         /* Deal cards */
         for (let player_id in this.players) {
             playerHands[player_id] = [this.deck.dealOneFaceUp()];
         }
         dealerHand.push(this.deck.dealOneFaceUp());
-
         for (let player_id in this.players) {
             playerHands[player_id].push(this.deck.dealOneFaceUp());
         }
@@ -111,7 +111,7 @@ export class Blackjack {
                 playerBets[player_id] = 0;
                 continue;
             }
-
+            
             while (true) {
                 // get the valid hand options this player can do
                 const validHandOptions = this.getValidOptions(
