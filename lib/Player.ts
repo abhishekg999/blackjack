@@ -30,7 +30,7 @@ export class RandomPlayer extends Player {
     }
 
     bet(): number {
-        const bet = 0.1 * this.money;
+        const bet = 1;
         this.money -= bet;
         return bet;
     }
@@ -92,7 +92,7 @@ export class BasicStrategyPlayer extends Player {
     }
 
     bet(): number {
-        const bet = 0.1 * this.money;
+        const bet = 100;
         this.money -= bet;
         return bet;
     }
@@ -105,6 +105,27 @@ export class BasicStrategyPlayer extends Player {
         const playerValue = Blackjack.evaluateHand(hand);
         const dealerValue = Blackjack.evaluateHand([dealerCard]);
 
+        const possiblePlayerValues = Blackjack.getAllPossibleHandValues(hand);
+        
+        // // Handle Soft Total Values
+        if (possiblePlayerValues.length > 1) {
+            // Soft A,2 - A,6
+            for (let i = 2; i <= 6; i++) {
+                if (possiblePlayerValues.includes(11 + i) && possiblePlayerValues.includes(1 + i)) {
+                    return BJOption.Hit;
+                }
+            }
+            // Soft A,7
+            if (possiblePlayerValues.includes(18) && possiblePlayerValues.includes(8)) {
+                if (dealerValue >= 9) {
+                    return BJOption.Hit;
+                } else {
+                    return BJOption.Stand;
+                }
+            }
+            return BJOption.Stand;
+        }
+        // Hard totals
         if (playerValue >= 17) {
             return BJOption.Stand;
         } else if (playerValue <= 11) {

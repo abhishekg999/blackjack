@@ -39,14 +39,20 @@ export const VALUES: CardValue[] = [
 ];
 export const suit: CardSuit[] = ["Clubs", "Hearts", "Spades", "Diamonds"];
 
+
 export const CARDS: Card[] = VALUES.flatMap((value) =>
-    suit.map((suit) => ({ value, suit }))
+    suit.map((suit) => ({ 
+        value,
+        suit,
+    }))
 );
 
 function validateCard(card: Card): boolean {
     const { value, suit } = card;
     return VALUES.includes(value) && suit.includes(suit);
 }
+
+
 
 export class Deck {
     private initDeck: Card[];

@@ -30,7 +30,7 @@ export const defaultBlackjackConfig: BlackjackConfig = {
 
 export class Blackjack {
     /* Static Methods */
-    static evaluateHand(hand: Hand): number {
+    static getAllPossibleHandValues(hand: Hand): number[] {
         let aceCount = 0;
         let handValue = 0;
         for (let card of hand) {
@@ -44,11 +44,23 @@ export class Blackjack {
                 handValue += parseInt(card.value);
             }
         }
-        while (aceCount > 0 && handValue > 21) {
+        let possibleValues = [handValue];
+        while (aceCount > 0) {
             handValue -= 10;
             aceCount -= 1;
+            possibleValues.push(handValue);
         }
-        return handValue;
+        return possibleValues;
+    }
+    
+    static evaluateHand(hand: Hand): number {
+        let possibleValues = Blackjack.getAllPossibleHandValues(hand);
+        // Get largest value that is less than or equal to 21
+        // If no value is less than or equal to 21, return the smallest value
+        let validValues = possibleValues.filter(value => value <= 21);
+        let maxValidValue = Math.max(...validValues);
+        let finalValue = validValues.length > 0 ? maxValidValue : Math.min(...possibleValues);
+        return finalValue;
     }
 
     /* Instance */
@@ -74,6 +86,7 @@ export class Blackjack {
     preRoundInitialize() {
         if (this.deck.length() < (2 / 5) * this.config.deckCount * 52) {
             this.deck.reset();
+            this.deck.shuffle();
         }
     }
 
@@ -125,11 +138,22 @@ export class Blackjack {
                     validHandOptions
                 );
 
+                // console.log(`Player Hand: ${playerHands[player_id].map((card) => card.value)} = ${Blackjack.evaluateHand(playerHands[player_id])} - ${BJOption[playerChoice]}`)
+
+
                 this.updateHand(playerHands[player_id], playerChoice);
 
                 if ([BJOption.Stand, BJOption.Double].includes(playerChoice)) {
                     break;
+                }           
+
+                if (Blackjack.evaluateHand(playerHands[player_id]) > 21) {
+                    // take their money    
+                    // console.log(`Player Hand: ${playerHands[player_id].map((card) => card.value)} = ${Blackjack.evaluateHand(playerHands[player_id])} - BUST`)                
+                    playerBets[player_id] = 0;
+                    break;
                 }
+
             }
 
             if (Blackjack.evaluateHand(playerHands[player_id]) > 21) {
@@ -142,6 +166,7 @@ export class Blackjack {
         /* Now dealer action */
         while (true) {
             const dealerChoice = this.dealer.play(dealerHand);
+            // console.log(`Dealer Hand: ${dealerHand.map((card) => card.value)} = ${Blackjack.evaluateHand(dealerHand)} - ${BJOption[dealerChoice]}`)
             this.updateHand(dealerHand, dealerChoice);
 
             if ([BJOption.Stand, BJOption.Double].includes(dealerChoice)) {
@@ -182,8 +207,11 @@ export class Blackjack {
                 break;
             case BJOption.Stand:
                 break;
-            default:
+            case BJOption.Hit:
                 hand.push(this.deck.dealOneFaceUp());
+                break
+            default:
+                throw new Error("Invalid option");
         }
     }
 

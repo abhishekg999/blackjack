@@ -5,35 +5,50 @@ import {
     RandomPlayer,
     BasicStrategyPlayer,
 } from "./Player";
-import { rigDeck } from "./Utils";
 
-const results = {
+
+const resultsPerRound = {
     wins: 0,
     losses: 0,
     pushes: 0,
 };
 
-const totalIterations = 100000;
+const resultsPerGame = {
+    wins: 0,
+    losses: 0,
+    pushes: 0,
+};
+
+const totalIterations = 10000;
 const progressBarWidth = 40;
+
+const playerInitMoney = 100000;
+const numRoundsPerGame = 100;
 
 for (let i = 0; i < totalIterations; i++) {
     const bj = new Blackjack(defaultBlackjackConfig);
-    const player = new BasicStrategyPlayer(100000);
-    // console.log("Player starts with: ", player.money);
+    const player = new BasicStrategyPlayer(playerInitMoney);
     bj.addPlayer(player);
-    rigDeck(bj.deck, (card) => card.value === '8');
-    rigDeck(bj.deck, (card) => card.value === '10');
-    rigDeck(bj.deck, (card) => card.value === '8');
-    bj.playRound();
 
-    // console.log("Player ends with: ", player.money);
+    for (let j = 0; j < numRoundsPerGame; j++) {
+        let startingMoney = player.money;
+        bj.playRound();
 
-    if (player.money > 100000) {
-        results.wins++;
-    } else if (player.money < 100000) {
-        results.losses++;
+        if (player.money > startingMoney) {
+            resultsPerRound.wins++;
+        } else if (player.money < startingMoney) {
+            resultsPerRound.losses++;
+        } else {
+            resultsPerRound.pushes++;
+        }
+    }
+
+    if (player.money > playerInitMoney) {
+        resultsPerGame.wins++;
+    } else if (player.money < playerInitMoney) {
+        resultsPerGame.losses++;
     } else {
-        results.pushes++;
+        resultsPerGame.pushes++;
     }
 
     // Calculate progress percentage
@@ -51,8 +66,12 @@ for (let i = 0; i < totalIterations; i++) {
     );
 }
 console.log();
-console.log(results);
 
-console.log(`Win rate: ${(results.wins / totalIterations) * 100}%`);
-console.log(`Loss rate: ${(results.losses / totalIterations) * 100}%`);
-console.log(`Push rate: ${(results.pushes / totalIterations) * 100}%`);
+console.log("Results per round:");
+console.log(resultsPerRound);
+console.log(`Win rate: ${resultsPerRound.wins / (totalIterations*numRoundsPerGame)}`);
+console.log(`Loss rate: ${resultsPerRound.losses / (totalIterations*numRoundsPerGame)}`);
+console.log(`Push rate: ${resultsPerRound.pushes / (totalIterations*numRoundsPerGame)}`);
+
+console.log("Results per game:");
+console.log(resultsPerGame);
