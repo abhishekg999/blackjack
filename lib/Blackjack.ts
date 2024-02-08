@@ -1,4 +1,4 @@
-import { Deck, Hand, CARDS, CardValue } from "./Deck";
+import { Deck, Hand, CARDS, CardValue, Card } from "./Deck";
 import { IDealer, DefaultDealer } from "./Dealer";
 import { listMultiply } from "./Utils";
 import { IPlayer } from "./Player";
@@ -69,6 +69,8 @@ export class Blackjack {
     dealer: IDealer;
     players: IPlayer[];
 
+    _count: number = 0;
+
     /* Instance Methods */
     constructor(config: BlackjackConfig) {
         this.config = config;
@@ -77,6 +79,22 @@ export class Blackjack {
         this.players = [];
 
         this.deck.shuffle();
+    }
+
+    _dealCard(): Card {
+        const card = this.deck.dealOneFaceUp();
+
+        if (["10", "J", "Q", "K", "A"].includes(card.value)) {
+            this._count -= 1;
+        } else if (["2", "3", "4", "5", "6"].includes(card.value)) {
+            this._count += 1;
+        }
+
+        return card;
+    }
+
+    _getCount(): number {
+        return this._count / (this.deck.length() / 52);
     }
 
     addPlayer(player: IPlayer) {
@@ -97,7 +115,8 @@ export class Blackjack {
 
         /* Get bets from players */
         for (let player_id in this.players) {
-            playerBets[player_id] = this.players[player_id].bet();
+            // @ts-expect-error
+            playerBets[player_id] = this.players[player_id].bet(this._getCount.bind(this));
         }
 
         const playerHands: { [key: number]: Hand } = {};

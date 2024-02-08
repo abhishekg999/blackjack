@@ -139,3 +139,21 @@ export class BasicStrategyPlayer extends Player {
         }
     }
 }
+
+
+export class CardCounter extends BasicStrategyPlayer {
+    constructor(initialMoney: number) {
+        super(initialMoney);
+    }
+
+    // @ts-expect-error
+    bet(getCountFunc): number {
+        const trueCount = getCountFunc();
+        if (trueCount < 1) {
+            return 100;
+        } else {
+            return trueCount*200 + 100;
+        }
+    }
+
+}
